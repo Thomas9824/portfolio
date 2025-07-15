@@ -199,7 +199,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, isVerySmall = fal
   useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
   useSphericalJoint(j3, card, [
     [0, 0, 0],
-    [0, isVerySmall ? 2.2 : isMobile ? 2.8 : 3.6, 0],
+    [0, isMobile ? 2.43 : 3.65, 0],
   ]);
 
   useEffect(() => {

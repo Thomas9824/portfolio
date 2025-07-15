@@ -29,8 +29,8 @@ export default function Home() {
   useEffect(() => {
     // Utilisation de GSAP pour initialiser la grille avec des hauteurs adaptatives
     if (gridRef.current) {
-      const rowHeights = isVerySmall ? '15px 15px 15px 15px 1fr 10px' : 
-                        isMobile ? '20px 20px 20px 20px 1fr 15px' : 
+      const rowHeights = isVerySmall ? '15px 15px 15px 15px 1fr' : 
+                        isMobile ? '20px 20px 20px 20px 1fr' : 
                         '40px 40px 40px 40px 1fr 30px'
       gsap.set(gridRef.current, {
         display: 'grid',
@@ -44,8 +44,8 @@ export default function Home() {
   }, [isMobile, isVerySmall])
 
   // Définir les hauteurs de grille selon l'écran
-  const gridRowHeights = isVerySmall ? '15px 15px 15px 15px 1fr 10px' : 
-                         isMobile ? '20px 20px 20px 20px 1fr 15px' : 
+  const gridRowHeights = isVerySmall ? '15px 15px 15px 15px 1fr' : 
+                         isMobile ? '20px 20px 20px 20px 1fr' : 
                          '40px 40px 40px 40px 1fr 30px'
 
   return (
@@ -139,34 +139,60 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Footer - R6: Thomas Mionnet © 2025 + Drag it! défilant */}
-      <div 
-        className="relative h-full w-full z-5 overflow-hidden"
-        style={{ 
-          gridColumn: '1 / -1',
-          gridRow: '6',
-          backgroundColor: 'rgb(0,255,0)',
-        }}
-      >
-        {/* Copyright - adapté pour mobile */}
-        <div className="absolute left-0 top-0 h-full flex items-center justify-center px-1 md:px-4" style={{ width: '50%' }}>
-          <p className={`text-black font-sans ${isVerySmall ? 'text-xs' : 'text-xs'} md:text-lg font-bold whitespace-nowrap`}>
-            Thomas Mionnet © 2025
-          </p>
-        </div>
-        
-        {/* Texte défilant "drag it !" - adapté pour mobile */}
-        <div className="absolute top-0 h-full flex items-center overflow-hidden" style={{ left: '50%', width: '50%' }}>
-          <div 
-            className={`whitespace-nowrap text-black font-sans ${isVerySmall ? 'text-xs' : 'text-xs'} md:text-2xl font-bold animate-scroll`}
-            style={{
-              animation: 'scroll-left 8s linear infinite',
-            }}
-          >
-            drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • 
+      {/* Footer Desktop - R6: Thomas Mionnet © 2025 + Drag it! défilant */}
+      {!isMobile && (
+        <div 
+          className="relative h-full w-full z-5 overflow-hidden"
+          style={{ 
+            gridColumn: '1 / -1',
+            gridRow: '6',
+            backgroundColor: 'rgb(0,255,0)',
+          }}
+        >
+          {/* Copyright - desktop */}
+          <div className="absolute left-0 top-0 h-full flex items-center justify-center px-4" style={{ width: '50%' }}>
+            <p className="text-black font-sans text-lg font-bold whitespace-nowrap">
+              Thomas Mionnet © 2025
+            </p>
+          </div>
+          
+          {/* Texte défilant "drag it !" - desktop */}
+          <div className="absolute top-0 h-full flex items-center overflow-hidden" style={{ left: '50%', width: '50%' }}>
+            <div 
+              className="whitespace-nowrap text-black font-sans text-2xl font-bold animate-scroll"
+              style={{
+                animation: 'scroll-left 8s linear infinite',
+              }}
+            >
+              drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • 
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Footer Mobile - Position fixe au niveau du toggle */}
+      {isMobile && (
+        <div className="fixed bottom-4 left-4 right-16 z-5 h-8 flex items-center overflow-hidden" style={{ backgroundColor: 'rgb(0,255,0)' }}>
+          {/* Copyright - mobile fixe */}
+          <div className="absolute left-0 top-0 h-full flex items-center justify-center px-2" style={{ width: '50%' }}>
+            <p className={`text-black font-sans ${isVerySmall ? 'text-xs' : 'text-xs'} font-bold whitespace-nowrap`}>
+              Thomas Mionnet © 2025
+            </p>
+          </div>
+          
+          {/* Texte défilant "drag it !" - mobile fixe */}
+          <div className="absolute top-0 h-full flex items-center overflow-hidden" style={{ left: '50%', width: '50%' }}>
+            <div 
+              className={`whitespace-nowrap text-black font-sans ${isVerySmall ? 'text-xs' : 'text-xs'} font-bold animate-scroll`}
+              style={{
+                animation: 'scroll-left 8s linear infinite',
+              }}
+            >
+              drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • 
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Animation CSS pour le défilement */}
       <style jsx>{`
@@ -207,9 +233,9 @@ export default function Home() {
           }}
         >
           {/* Génération de toutes les cellules de la grille */}
-          {Array.from({ length: 6 }, (_, rowIndex) => 
+          {Array.from({ length: isMobile ? 5 : 6 }, (_, rowIndex) => 
             Array.from({ length: 12 }, (_, colIndex) => {
-              const rowNames = ['menu1', 'menu2', 'menu3', 'menu4', 'content', 'footer']
+              const rowNames = isMobile ? ['menu1', 'menu2', 'menu3', 'menu4', 'content'] : ['menu1', 'menu2', 'menu3', 'menu4', 'content', 'footer']
               const rowColors = ['bg-purple-500', 'bg-indigo-500', 'bg-blue-500', 'bg-green-500', 'bg-red-500', 'bg-yellow-500']
               
               return (
@@ -219,7 +245,7 @@ export default function Home() {
                   style={{ 
                     gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
                     gridRow: `${rowIndex + 1} / ${rowIndex + 2}`,
-                    minHeight: rowIndex === 5 ? (isVerySmall ? '10px' : isMobile ? '15px' : '30px') : rowIndex < 4 ? (isVerySmall ? '15px' : isMobile ? '20px' : '40px') : 'auto'
+                    minHeight: rowIndex === 5 ? '30px' : rowIndex < 4 ? (isVerySmall ? '15px' : isMobile ? '20px' : '40px') : 'auto'
                   }}
                 >
                   <div className="text-xs text-white font-bold text-center bg-black bg-opacity-50 px-1 py-0.5 rounded font-sans">
@@ -252,10 +278,12 @@ export default function Home() {
             className="border-t-4 border-white border-opacity-80"
             style={{ gridColumn: '1 / -1', gridRow: '5 / 6' }}
           />
-          <div 
-            className="border-t-4 border-white border-opacity-80"
-            style={{ gridColumn: '1 / -1', gridRow: '6 / 7' }}
-          />
+          {!isMobile && (
+            <div 
+              className="border-t-4 border-white border-opacity-80"
+              style={{ gridColumn: '1 / -1', gridRow: '6 / 7' }}
+            />
+          )}
           
           {/* Lignes de séparation des colonnes */}
           {Array.from({ length: 13 }, (_, i) => (
