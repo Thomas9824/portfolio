@@ -8,11 +8,13 @@ export default function Home() {
   const gridRef = useRef<HTMLDivElement>(null)
   const [showGrid, setShowGrid] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [isVerySmall, setIsVerySmall] = useState(false)
 
   useEffect(() => {
     // Fonction pour détecter si on est sur mobile
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768)
+      setIsVerySmall(window.innerWidth < 480 || window.innerHeight < 700) // iPhone et petits écrans
     }
 
     // Vérifier au chargement initial
@@ -27,7 +29,9 @@ export default function Home() {
   useEffect(() => {
     // Utilisation de GSAP pour initialiser la grille avec des hauteurs adaptatives
     if (gridRef.current) {
-      const rowHeights = isMobile ? '20px 20px 20px 20px 1fr 15px' : '40px 40px 40px 40px 1fr 30px'
+      const rowHeights = isVerySmall ? '15px 15px 15px 15px 1fr 10px' : 
+                        isMobile ? '20px 20px 20px 20px 1fr 15px' : 
+                        '40px 40px 40px 40px 1fr 30px'
       gsap.set(gridRef.current, {
         display: 'grid',
         gridTemplateColumns: 'repeat(12, 1fr)',
@@ -37,10 +41,12 @@ export default function Home() {
         gap: '0px',
       })
     }
-  }, [isMobile])
+  }, [isMobile, isVerySmall])
 
   // Définir les hauteurs de grille selon l'écran
-  const gridRowHeights = isMobile ? '20px 20px 20px 20px 1fr 15px' : '40px 40px 40px 40px 1fr 30px'
+  const gridRowHeights = isVerySmall ? '15px 15px 15px 15px 1fr 10px' : 
+                         isMobile ? '20px 20px 20px 20px 1fr 15px' : 
+                         '40px 40px 40px 40px 1fr 30px'
 
   return (
     <div 
@@ -82,7 +88,7 @@ export default function Home() {
           gridRow: '1 / 2',
         }}
       >
-        <a href="#home" className="text-black font-sans text-base md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0">Home</a>
+        <a href="#home" className={`text-black font-sans ${isVerySmall ? 'text-sm' : 'text-base'} md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0`}>Home</a>
       </div>
 
       {/* Menu - R2C1: About */}
@@ -93,7 +99,7 @@ export default function Home() {
           gridRow: '2 / 3',
         }}
       >
-        <a href="#about" className="text-black font-sans text-base md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0">About</a>
+        <a href="#about" className={`text-black font-sans ${isVerySmall ? 'text-sm' : 'text-base'} md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0`}>About</a>
       </div>
 
       {/* Menu - R3C1: Work */}
@@ -104,7 +110,7 @@ export default function Home() {
           gridRow: '3 / 4',
         }}
       >
-        <a href="#work" className="text-black font-sans text-base md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0">Work</a>
+        <a href="#work" className={`text-black font-sans ${isVerySmall ? 'text-sm' : 'text-base'} md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0`}>Work</a>
       </div>
 
       {/* Menu - R4C1: Contact */}
@@ -115,7 +121,7 @@ export default function Home() {
           gridRow: '4 / 5',
         }}
       >
-        <a href="#contact" className="text-black font-sans text-base md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0">Contact</a>
+        <a href="#contact" className={`text-black font-sans ${isVerySmall ? 'text-sm' : 'text-base'} md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0`}>Contact</a>
       </div>
 
       {/* Language Selector - R1C12: FR/EN */}
@@ -126,7 +132,7 @@ export default function Home() {
           gridRow: '1 / 2',
         }}
       >
-        <div className="text-black font-sans text-xs md:text-lg h-full w-full flex items-center justify-center">
+        <div className={`text-black font-sans ${isVerySmall ? 'text-xs' : 'text-xs'} md:text-lg h-full w-full flex items-center justify-center`}>
           <span className="cursor-pointer hover:text-gray-600 transition-colors">FR</span>
           <span className="mx-1">/</span>
           <span className="cursor-pointer hover:text-gray-600 transition-colors">EN</span>
@@ -144,7 +150,7 @@ export default function Home() {
       >
         {/* Copyright - adapté pour mobile */}
         <div className="absolute left-0 top-0 h-full flex items-center justify-center px-1 md:px-4" style={{ width: '50%' }}>
-          <p className="text-black font-sans text-xs md:text-lg font-bold whitespace-nowrap">
+          <p className={`text-black font-sans ${isVerySmall ? 'text-xs' : 'text-xs'} md:text-lg font-bold whitespace-nowrap`}>
             Thomas Mionnet © 2025
           </p>
         </div>
@@ -152,7 +158,7 @@ export default function Home() {
         {/* Texte défilant "drag it !" - adapté pour mobile */}
         <div className="absolute top-0 h-full flex items-center overflow-hidden" style={{ left: '50%', width: '50%' }}>
           <div 
-            className="whitespace-nowrap text-black font-sans text-xs md:text-2xl font-bold animate-scroll"
+            className={`whitespace-nowrap text-black font-sans ${isVerySmall ? 'text-xs' : 'text-xs'} md:text-2xl font-bold animate-scroll`}
             style={{
               animation: 'scroll-left 8s linear infinite',
             }}
@@ -185,7 +191,7 @@ export default function Home() {
           gridRow: '1 / -1',
         }}
       >
-        <Lanyard />
+        <Lanyard isVerySmall={isVerySmall} />
       </div>
 
       {/* Debug Grid - Conditional */}
@@ -213,7 +219,7 @@ export default function Home() {
                   style={{ 
                     gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
                     gridRow: `${rowIndex + 1} / ${rowIndex + 2}`,
-                    minHeight: rowIndex === 5 ? (isMobile ? '15px' : '30px') : rowIndex < 4 ? (isMobile ? '20px' : '40px') : 'auto'
+                    minHeight: rowIndex === 5 ? (isVerySmall ? '10px' : isMobile ? '15px' : '30px') : rowIndex < 4 ? (isVerySmall ? '15px' : isMobile ? '20px' : '40px') : 'auto'
                   }}
                 >
                   <div className="text-xs text-white font-bold text-center bg-black bg-opacity-50 px-1 py-0.5 rounded font-sans">

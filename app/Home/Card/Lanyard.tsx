@@ -41,6 +41,7 @@ interface LanyardProps {
   gravity?: [number, number, number];
   fov?: number;
   transparent?: boolean;
+  isVerySmall?: boolean;
 }
 
 export default function Lanyard({
@@ -48,6 +49,7 @@ export default function Lanyard({
   gravity = [0, -40, 0],
   fov = 2,
   transparent = true,
+  isVerySmall = false,
 }: LanyardProps) {
   const [isMobile, setIsMobile] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
@@ -65,10 +67,10 @@ export default function Lanyard({
     return (): void => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Paramètres adaptés pour mobile
-  const mobilePosition: [number, number, number] = [0, 0, 120];
-  const mobileGravity: [number, number, number] = [0, -40, 0];
-  const mobileFov = 4;
+  // Paramètres adaptés pour mobile et très petits écrans
+  const mobilePosition: [number, number, number] = isVerySmall ? [0, 0, 100] : [0, 0, 120];
+  const mobileGravity: [number, number, number] = isVerySmall ? [-0, -45, 0] : [0, -40, 0];
+  const mobileFov = isVerySmall ? 5 : 4;
 
   return (
     <div className="relative z-0 w-full h-full flex justify-center items-center transform scale-100 origin-center mobile-optimized">
@@ -96,7 +98,7 @@ export default function Lanyard({
           timeStep={1 / 60}
           paused={false}
         >
-          <Band isMobile={isMobile} />
+          <Band isMobile={isMobile} isVerySmall={isVerySmall} />
         </Physics>
         <Environment blur={0.75}>
           <Lightformer
@@ -137,9 +139,10 @@ interface BandProps {
   maxSpeed?: number;
   minSpeed?: number;
   isMobile?: boolean;
+  isVerySmall?: boolean;
 }
 
-function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
+function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, isVerySmall = false }: BandProps) {
   // Using "any" for refs since the exact types depend on Rapier's internals
   const band = useRef<any>(null);
   const fixed = useRef<any>(null);
@@ -196,7 +199,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
   useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
   useSphericalJoint(j3, card, [
     [0, 0, 0],
-    [0, isMobile ? 2.43 : 3.65, 0],
+    [0, isVerySmall ? 2.2 : isMobile ? 2.8 : 3.6, 0],
   ]);
 
   useEffect(() => {
@@ -298,7 +301,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
         >
           <CuboidCollider args={[1.4, 2, 0.01]} />
           <group
-            scale={isMobile ? 3 : 4}
+            scale={isVerySmall ? 2.2 : isMobile ? 3 : 4}
             position={[0, -1.2, -0.05]}
             onPointerOver={() => !isMobile && hover(true)}
             onPointerOut={() => !isMobile && hover(false)}
