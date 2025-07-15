@@ -196,7 +196,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
   useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
   useSphericalJoint(j3, card, [
     [0, 0, 0],
-    [0, 3.6, 0],
+    [0, isMobile ? 2.4 : 3.6, 0],
   ]);
 
   useEffect(() => {
@@ -256,7 +256,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
 
   return (
     <>
-      <group position={isMobile ? [0, 4, 0] : [0, 6, 0]}>
+      <group position={[0, 6, 0]}>
         <RigidBody
           ref={fixed}
           {...segmentProps}
@@ -298,7 +298,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
         >
           <CuboidCollider args={[1.4, 2, 0.01]} />
           <group
-            scale={isMobile ? 2.5 : 4}
+            scale={isMobile ? 3 : 4}
             position={[0, -1.2, -0.05]}
             onPointerOver={() => !isMobile && hover(true)}
             onPointerOut={() => !isMobile && hover(false)}
@@ -343,7 +343,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
           useMap
           map={texture}
           repeat={[-4, 1]}
-          lineWidth={isMobile ? 8 : 10}
+          lineWidth={isMobile ? 6 : 10}
         />
       </mesh>
     </>
