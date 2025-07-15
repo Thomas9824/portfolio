@@ -66,12 +66,12 @@ export default function Lanyard({
   }, []);
 
   // Paramètres adaptés pour mobile
-  const mobilePosition: [number, number, number] = [0, 0, 150];
-  const mobileGravity: [number, number, number] = [0, -30, 0];
-  const mobileFov = 3;
+  const mobilePosition: [number, number, number] = [0, 0, 120];
+  const mobileGravity: [number, number, number] = [0, -40, 0];
+  const mobileFov = 4;
 
   return (
-    <div className="relative z-0 w-full h-full flex justify-center items-start transform scale-100 origin-top mobile-optimized">
+    <div className="relative z-0 w-full h-full flex justify-center items-center transform scale-100 origin-center mobile-optimized">
       <Canvas
         camera={{ 
           position: isMobile ? mobilePosition : position, 
@@ -256,7 +256,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
 
   return (
     <>
-      <group position={[0, 6, 0]}>
+      <group position={isMobile ? [0, 4, 0] : [0, 6, 0]}>
         <RigidBody
           ref={fixed}
           {...segmentProps}
@@ -298,7 +298,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
         >
           <CuboidCollider args={[1.4, 2, 0.01]} />
           <group
-            scale={isMobile ? 3 : 4}
+            scale={isMobile ? 2.5 : 4}
             position={[0, -1.2, -0.05]}
             onPointerOver={() => !isMobile && hover(true)}
             onPointerOut={() => !isMobile && hover(false)}
