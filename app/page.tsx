@@ -7,29 +7,50 @@ import Lanyard from './Home/Card/Lanyard'
 export default function Home() {
   const gridRef = useRef<HTMLDivElement>(null)
   const [showGrid, setShowGrid] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    // Utilisation de GSAP pour initialiser la grille (sans animation)
+    // Fonction pour détecter si on est sur mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    // Vérifier au chargement initial
+    checkMobile()
+
+    // Écouter les changements de taille d'écran
+    window.addEventListener('resize', checkMobile)
+
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  useEffect(() => {
+    // Utilisation de GSAP pour initialiser la grille avec des hauteurs adaptatives
     if (gridRef.current) {
+      const rowHeights = isMobile ? '30px 30px 30px 30px 1fr 25px' : '40px 40px 40px 40px 1fr 30px'
       gsap.set(gridRef.current, {
         display: 'grid',
         gridTemplateColumns: 'repeat(12, 1fr)',
-        gridTemplateRows: '40px 40px 40px 40px 1fr 30px',
+        gridTemplateRows: rowHeights,
         minHeight: '100vh',
+        maxHeight: '100vh',
         gap: '0px',
       })
     }
-  }, [])
+  }, [isMobile])
+
+  // Définir les hauteurs de grille selon l'écran
+  const gridRowHeights = isMobile ? '30px 30px 30px 30px 1fr 25px' : '40px 40px 40px 40px 1fr 30px'
 
   return (
     <div 
       ref={gridRef}
-      className="min-h-screen relative"
+      className="h-screen relative overflow-hidden"
       style={{ 
         backgroundColor: 'white',
         display: 'grid',
         gridTemplateColumns: 'repeat(12, 1fr)',
-        gridTemplateRows: '40px 40px 40px 40px 1fr 30px',
+        gridTemplateRows: gridRowHeights,
         gap: '0px',
         padding: '0px',
       }}
@@ -61,7 +82,7 @@ export default function Home() {
           gridRow: '1 / 2',
         }}
       >
-        <a href="#home" className="text-black font-sans text-2xl md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-2 py-1">Home</a>
+        <a href="#home" className="text-black font-sans text-xl md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-2 py-1">Home</a>
       </div>
 
       {/* Menu - R2C1: About */}
@@ -72,7 +93,7 @@ export default function Home() {
           gridRow: '2 / 3',
         }}
       >
-        <a href="#about" className="text-black font-sans text-2xl md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-2 py-1">About</a>
+        <a href="#about" className="text-black font-sans text-xl md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-2 py-1">About</a>
       </div>
 
       {/* Menu - R3C1: Work */}
@@ -83,7 +104,7 @@ export default function Home() {
           gridRow: '3 / 4',
         }}
       >
-        <a href="#work" className="text-black font-sans text-2xl md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-2 py-1">Work</a>
+        <a href="#work" className="text-black font-sans text-xl md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-2 py-1">Work</a>
       </div>
 
       {/* Menu - R4C1: Contact */}
@@ -94,7 +115,7 @@ export default function Home() {
           gridRow: '4 / 5',
         }}
       >
-        <a href="#contact" className="text-black font-sans text-2xl md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-2 py-1">Contact</a>
+        <a href="#contact" className="text-black font-sans text-xl md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-2 py-1">Contact</a>
       </div>
 
       {/* Language Selector - R1C12: FR/EN */}
@@ -105,7 +126,7 @@ export default function Home() {
           gridRow: '1 / 2',
         }}
       >
-        <div className="text-black font-sans text-base md:text-lg h-full w-full flex items-center justify-center">
+        <div className="text-black font-sans text-sm md:text-lg h-full w-full flex items-center justify-center">
           <span className="cursor-pointer hover:text-gray-600 transition-colors">FR</span>
           <span className="mx-1">/</span>
           <span className="cursor-pointer hover:text-gray-600 transition-colors">EN</span>
@@ -122,8 +143,8 @@ export default function Home() {
         }}
       >
         {/* Copyright - adapté pour mobile */}
-        <div className="absolute left-0 top-0 h-full flex items-center justify-center px-2 md:px-4" style={{ width: '50%' }}>
-          <p className="text-black font-sans text-sm md:text-lg font-bold whitespace-nowrap">
+        <div className="absolute left-0 top-0 h-full flex items-center justify-center px-1 md:px-4" style={{ width: '50%' }}>
+          <p className="text-black font-sans text-xs md:text-lg font-bold whitespace-nowrap">
             Thomas Mionnet © 2025
           </p>
         </div>
@@ -131,7 +152,7 @@ export default function Home() {
         {/* Texte défilant "drag it !" - adapté pour mobile */}
         <div className="absolute top-0 h-full flex items-center overflow-hidden" style={{ left: '50%', width: '50%' }}>
           <div 
-            className="whitespace-nowrap text-black font-sans text-lg md:text-2xl font-bold animate-scroll"
+            className="whitespace-nowrap text-black font-sans text-sm md:text-2xl font-bold animate-scroll"
             style={{
               animation: 'scroll-left 8s linear infinite',
             }}
@@ -174,7 +195,7 @@ export default function Home() {
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(12, 1fr)',
-            gridTemplateRows: '40px 40px 40px 40px 1fr 30px',
+            gridTemplateRows: gridRowHeights,
             gap: '0px',
             padding: '0px',
           }}
@@ -192,7 +213,7 @@ export default function Home() {
                   style={{ 
                     gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
                     gridRow: `${rowIndex + 1} / ${rowIndex + 2}`,
-                    minHeight: rowIndex === 5 ? '30px' : rowIndex < 4 ? '40px' : 'auto'
+                    minHeight: rowIndex === 5 ? (isMobile ? '25px' : '30px') : rowIndex < 4 ? (isMobile ? '30px' : '40px') : 'auto'
                   }}
                 >
                   <div className="text-xs text-white font-bold text-center bg-black bg-opacity-50 px-1 py-0.5 rounded font-sans">
