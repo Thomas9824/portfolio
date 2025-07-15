@@ -27,7 +27,7 @@ export default function Home() {
   useEffect(() => {
     // Utilisation de GSAP pour initialiser la grille avec des hauteurs adaptatives
     if (gridRef.current) {
-      const rowHeights = isMobile ? '25px 25px 25px 25px 1fr 20px' : '40px 40px 40px 40px 1fr 30px'
+      const rowHeights = isMobile ? '20px 20px 20px 20px 1fr 15px' : '40px 40px 40px 40px 1fr 30px'
       gsap.set(gridRef.current, {
         display: 'grid',
         gridTemplateColumns: 'repeat(12, 1fr)',
@@ -40,7 +40,7 @@ export default function Home() {
   }, [isMobile])
 
   // Définir les hauteurs de grille selon l'écran
-  const gridRowHeights = isMobile ? '25px 25px 25px 25px 1fr 20px' : '40px 40px 40px 40px 1fr 30px'
+  const gridRowHeights = isMobile ? '20px 20px 20px 20px 1fr 15px' : '40px 40px 40px 40px 1fr 30px'
 
   return (
     <div 
@@ -82,7 +82,7 @@ export default function Home() {
           gridRow: '1 / 2',
         }}
       >
-        <a href="#home" className="text-black font-sans text-lg md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0.5">Home</a>
+        <a href="#home" className="text-black font-sans text-base md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0">Home</a>
       </div>
 
       {/* Menu - R2C1: About */}
@@ -93,7 +93,7 @@ export default function Home() {
           gridRow: '2 / 3',
         }}
       >
-        <a href="#about" className="text-black font-sans text-lg md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0.5">About</a>
+        <a href="#about" className="text-black font-sans text-base md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0">About</a>
       </div>
 
       {/* Menu - R3C1: Work */}
@@ -104,7 +104,7 @@ export default function Home() {
           gridRow: '3 / 4',
         }}
       >
-        <a href="#work" className="text-black font-sans text-lg md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0.5">Work</a>
+        <a href="#work" className="text-black font-sans text-base md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0">Work</a>
       </div>
 
       {/* Menu - R4C1: Contact */}
@@ -115,7 +115,7 @@ export default function Home() {
           gridRow: '4 / 5',
         }}
       >
-        <a href="#contact" className="text-black font-sans text-lg md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0.5">Contact</a>
+        <a href="#contact" className="text-black font-sans text-base md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0">Contact</a>
       </div>
 
       {/* Language Selector - R1C12: FR/EN */}
@@ -126,7 +126,7 @@ export default function Home() {
           gridRow: '1 / 2',
         }}
       >
-        <div className="text-black font-sans text-sm md:text-lg h-full w-full flex items-center justify-center">
+        <div className="text-black font-sans text-xs md:text-lg h-full w-full flex items-center justify-center">
           <span className="cursor-pointer hover:text-gray-600 transition-colors">FR</span>
           <span className="mx-1">/</span>
           <span className="cursor-pointer hover:text-gray-600 transition-colors">EN</span>
@@ -152,7 +152,7 @@ export default function Home() {
         {/* Texte défilant "drag it !" - adapté pour mobile */}
         <div className="absolute top-0 h-full flex items-center overflow-hidden" style={{ left: '50%', width: '50%' }}>
           <div 
-            className="whitespace-nowrap text-black font-sans text-sm md:text-2xl font-bold animate-scroll"
+            className="whitespace-nowrap text-black font-sans text-xs md:text-2xl font-bold animate-scroll"
             style={{
               animation: 'scroll-left 8s linear infinite',
             }}
@@ -213,7 +213,7 @@ export default function Home() {
                   style={{ 
                     gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
                     gridRow: `${rowIndex + 1} / ${rowIndex + 2}`,
-                    minHeight: rowIndex === 5 ? (isMobile ? '20px' : '30px') : rowIndex < 4 ? (isMobile ? '25px' : '40px') : 'auto'
+                    minHeight: rowIndex === 5 ? (isMobile ? '15px' : '30px') : rowIndex < 4 ? (isMobile ? '20px' : '40px') : 'auto'
                   }}
                 >
                   <div className="text-xs text-white font-bold text-center bg-black bg-opacity-50 px-1 py-0.5 rounded font-sans">
