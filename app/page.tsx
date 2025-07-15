@@ -76,7 +76,7 @@ export default function Home() {
 
       {/* Menu - R1C1: Home */}
       <div 
-        className="flex items-center justify-start h-full w-full z-10"
+        className="flex items-center justify-start h-full w-full z-5"
         style={{ 
           gridColumn: '1 / 2',
           gridRow: '1 / 2',
@@ -87,7 +87,7 @@ export default function Home() {
 
       {/* Menu - R2C1: About */}
       <div 
-        className="flex items-center justify-start h-full w-full z-10"
+        className="flex items-center justify-start h-full w-full z-5"
         style={{ 
           gridColumn: '1 / 2',
           gridRow: '2 / 3',
@@ -98,7 +98,7 @@ export default function Home() {
 
       {/* Menu - R3C1: Work */}
       <div 
-        className="flex items-center justify-start h-full w-full z-10"
+        className="flex items-center justify-start h-full w-full z-5"
         style={{ 
           gridColumn: '1 / 2',
           gridRow: '3 / 4',
@@ -109,7 +109,7 @@ export default function Home() {
 
       {/* Menu - R4C1: Contact */}
       <div 
-        className="flex items-center justify-start h-full w-full z-10"
+        className="flex items-center justify-start h-full w-full z-5"
         style={{ 
           gridColumn: '1 / 2',
           gridRow: '4 / 5',
@@ -120,7 +120,7 @@ export default function Home() {
 
       {/* Language Selector - R1C12: FR/EN */}
       <div 
-        className="flex items-center justify-center h-full w-full z-10"
+        className="flex items-center justify-center h-full w-full z-5"
         style={{ 
           gridColumn: '12 / 13',
           gridRow: '1 / 2',
@@ -135,7 +135,7 @@ export default function Home() {
 
       {/* Footer - R6: Thomas Mionnet © 2025 + Drag it! défilant */}
       <div 
-        className="relative h-full w-full z-10 overflow-hidden"
+        className="relative h-full w-full z-5 overflow-hidden"
         style={{ 
           gridColumn: '1 / -1',
           gridRow: '6',
@@ -179,7 +179,7 @@ export default function Home() {
 
       {/* Content - R1 à R6: Lanyard Full Screen */}
       <div 
-        className="flex items-center justify-center h-full w-full z-0"
+        className="flex items-center justify-center h-full w-full z-30"
         style={{ 
           gridColumn: '1 / -1',
           gridRow: '1 / -1',

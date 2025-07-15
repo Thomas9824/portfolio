@@ -196,7 +196,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
   useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
   useSphericalJoint(j3, card, [
     [0, 0, 0],
-    [0, isMobile ? 2.4 : 3.6, 0],
+    [0, isMobile ? 2.43 : 3.65, 0],
   ]);
 
   useEffect(() => {
@@ -343,7 +343,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }: BandProps) {
           useMap
           map={texture}
           repeat={[-4, 1]}
-          lineWidth={isMobile ? 6 : 10}
+          lineWidth={isMobile ? 4 : 10}
         />
       </mesh>
     </>
