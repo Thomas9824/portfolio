@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+import Lenis from 'lenis'
 import SpotlightNavbar from './Home/components/SpotlightNavbar'
 import LightRays from './Home/components/LightRays'
 import About from './About/About'
@@ -13,11 +14,35 @@ export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null)
   const navbarRef = useRef<HTMLDivElement>(null)
   const homeContentRef = useRef<HTMLDivElement>(null)
+  const lenisRef = useRef<Lenis | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
   const [currentSection, setCurrentSection] = useState('home')
   
   // Debug log
   console.log('Current section:', currentSection)
+
+  // Initialize Lenis smooth scroll
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+    })
+
+    lenisRef.current = lenis
+
+    function raf(time: number) {
+      lenis.raf(time)
+      requestAnimationFrame(raf)
+    }
+    requestAnimationFrame(raf)
+
+    return () => {
+      lenis.destroy()
+    }
+  }, [])
 
   // Scroll detection
   useEffect(() => {
@@ -148,15 +173,15 @@ export default function Home() {
         ease: "power3.inOut"
       }, "-=0.1")
       
-      // Phase 3: Scroll to about section with smooth easing
-      tl.to(window, {
-        duration: 0.5,
-        scrollTo: {
-          y: "#about",
-          offsetY: 0
-        },
-        ease: "power3.inOut"
-      }, "-=0.2")
+      // Phase 3: Scroll to about section with Lenis
+      tl.call(() => {
+        if (lenisRef.current) {
+          lenisRef.current.scrollTo("#about", {
+            duration: 0.8,
+            easing: (t) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1
+          })
+        }
+      }, [], "-=0.2")
       
       // Phase 4: Animate about content in
       tl.fromTo("#about > div", {
@@ -185,12 +210,15 @@ export default function Home() {
         ease: "power2.in"
       })
       
-      // Scroll back to home
-      .to(window, {
-        duration: 0.8,
-        scrollTo: "#home",
-        ease: "power3.inOut"
-      }, "-=0.1")
+      // Scroll back to home with Lenis
+      .call(() => {
+        if (lenisRef.current) {
+          lenisRef.current.scrollTo("#home", {
+            duration: 0.8,
+            easing: (t) => t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1
+          })
+        }
+      }, [], "-=0.1")
       
       // Restore navbar position
       .to(navbarRef.current, {
