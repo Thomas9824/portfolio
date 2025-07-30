@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unknown-property */
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, Suspense } from "react";
 import { Canvas, extend, useFrame } from "@react-three/fiber";
 import {
   useGLTF,
@@ -46,8 +46,8 @@ interface LanyardProps {
 
 export default function Lanyard({
   position = [0, 0, 200],
-  gravity = [0, -40, 0],
-  fov = 2,
+  gravity = [0, 100, 0],
+  fov = 10,
   transparent = true,
   isVerySmall = false,
 }: LanyardProps) {
@@ -98,7 +98,9 @@ export default function Lanyard({
           timeStep={1 / 60}
           paused={false}
         >
-          <Band isMobile={isMobile} isVerySmall={isVerySmall} />
+          <Suspense fallback={<group />}>
+            <BandWrapper isMobile={isMobile} isVerySmall={isVerySmall} />
+          </Suspense>
         </Physics>
         <Environment blur={0.75}>
           <Lightformer
@@ -135,6 +137,11 @@ export default function Lanyard({
   );
 }
 
+// Wrapper pour gérer le chargement du modèle
+function BandWrapper({ isMobile, isVerySmall }: { isMobile: boolean; isVerySmall: boolean }) {
+  return <Band isMobile={isMobile} isVerySmall={isVerySmall} />;
+}
+
 interface BandProps {
   maxSpeed?: number;
   minSpeed?: number;
@@ -164,8 +171,10 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, isVerySmall = fal
     linearDamping: isMobile ? 6 : 4,
   };
 
+  // Chargement du modèle GLB avec gestion d'erreur
   const { nodes, materials } = useGLTF(cardGLB) as any;
   const texture = useTexture(lanyard);
+  
   const [curve] = useState(
     () =>
       new THREE.CatmullRomCurve3([
@@ -175,8 +184,9 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, isVerySmall = fal
         new THREE.Vector3(),
       ])
   );
-  const [dragged, drag] = useState<false | THREE.Vector3>(false);
-  const [hovered, hover] = useState(false);
+  
+  const [dragged, setDragged] = useState<false | THREE.Vector3>(false);
+  const [hovered, setHovered] = useState(false);
 
   const [isSmall, setIsSmall] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
@@ -194,6 +204,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, isVerySmall = fal
     return (): void => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Joints Rapier
   useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
   useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
@@ -211,48 +222,118 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, isVerySmall = fal
     }
   }, [hovered, dragged, isMobile]);
 
-  useFrame((state, delta) => {
-    if (dragged && typeof dragged !== "boolean") {
-      vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
-      dir.copy(vec).sub(state.camera.position).normalize();
-      vec.add(dir.multiplyScalar(state.camera.position.length()));
-      [card, j1, j2, j3, fixed].forEach((ref) => ref.current?.wakeUp());
-      card.current?.setNextKinematicTranslation({
-        x: vec.x - dragged.x,
-        y: vec.y - dragged.y,
-        z: vec.z - dragged.z,
-      });
+  // Handlers sécurisés pour les événements
+  const handlePointerDown = useCallback((e: any) => {
+    if (!card.current) return;
+    try {
+      e.target.setPointerCapture(e.pointerId);
+      setDragged(
+        new THREE.Vector3()
+          .copy(e.point)
+          .sub(vec.copy(card.current.translation()))
+      );
+    } catch (error) {
+      console.error("Erreur dans handlePointerDown:", error);
     }
-    if (fixed.current) {
-      const speedMultiplier = isMobile ? 0.8 : 1; // Réduction de la vitesse sur mobile
-      [j1, j2].forEach((ref) => {
-        if (!ref.current.lerped)
-          ref.current.lerped = new THREE.Vector3().copy(
-            ref.current.translation()
-          );
-        const clampedDistance = Math.max(
-          0.1,
-          Math.min(1, ref.current.lerped.distanceTo(ref.current.translation()))
-        );
-        ref.current.lerped.lerp(
-          ref.current.translation(),
-          delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed)) * speedMultiplier
-        );
-      });
-      curve.points[0].copy(j3.current.translation());
-      curve.points[1].copy(j2.current.lerped);
-      curve.points[2].copy(j1.current.lerped);
-      curve.points[3].copy(fixed.current.translation());
-      band.current.geometry.setPoints(curve.getPoints(isMobile ? 24 : 32));
-      ang.copy(card.current.angvel());
-      rot.copy(card.current.rotation());
-      card.current.setAngvel({ 
-        x: ang.x, 
-        y: ang.y - rot.y * (isMobile ? 0.15 : 0.25), 
-        z: ang.z 
-      });
+  }, [vec]);
+
+  const handlePointerUp = useCallback((e: any) => {
+    try {
+      e.target.releasePointerCapture(e.pointerId);
+      setDragged(false);
+    } catch (error) {
+      console.error("Erreur dans handlePointerUp:", error);
+    }
+  }, []);
+
+  const handlePointerOver = useCallback(() => {
+    if (!isMobile) setHovered(true);
+  }, [isMobile]);
+
+  const handlePointerOut = useCallback(() => {
+    if (!isMobile) setHovered(false);
+  }, [isMobile]);
+
+  useFrame((state, delta) => {
+    try {
+      if (dragged && typeof dragged !== "boolean" && card.current) {
+        vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
+        dir.copy(vec).sub(state.camera.position).normalize();
+        vec.add(dir.multiplyScalar(state.camera.position.length()));
+        
+        // Vérifier que toutes les références existent avant de les réveiller
+        [card, j1, j2, j3, fixed].forEach((ref) => {
+          if (ref.current?.wakeUp) {
+            ref.current.wakeUp();
+          }
+        });
+        
+        if (card.current?.setNextKinematicTranslation) {
+          card.current.setNextKinematicTranslation({
+            x: vec.x - dragged.x,
+            y: vec.y - dragged.y,
+            z: vec.z - dragged.z,
+          });
+        }
+      }
+      
+      if (fixed.current && j1.current && j2.current && j3.current && card.current && band.current) {
+        const speedMultiplier = isMobile ? 0.8 : 1;
+        
+        [j1, j2].forEach((ref) => {
+          if (ref.current?.translation) {
+            if (!ref.current.lerped) {
+              ref.current.lerped = new THREE.Vector3().copy(ref.current.translation());
+            }
+            const clampedDistance = Math.max(
+              0.1,
+              Math.min(1, ref.current.lerped.distanceTo(ref.current.translation()))
+            );
+            ref.current.lerped.lerp(
+              ref.current.translation(),
+              delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed)) * speedMultiplier
+            );
+          }
+        });
+        
+        if (j3.current?.translation && j2.current?.lerped && j1.current?.lerped && fixed.current?.translation) {
+          curve.points[0].copy(j3.current.translation());
+          curve.points[1].copy(j2.current.lerped);
+          curve.points[2].copy(j1.current.lerped);
+          curve.points[3].copy(fixed.current.translation());
+          
+          if (band.current?.geometry?.setPoints) {
+            band.current.geometry.setPoints(curve.getPoints(isMobile ? 24 : 32));
+          }
+        }
+        
+        if (card.current?.angvel && card.current?.rotation && card.current?.setAngvel) {
+          ang.copy(card.current.angvel());
+          rot.copy(card.current.rotation());
+          card.current.setAngvel({ 
+            x: ang.x, 
+            y: ang.y - rot.y * (isMobile ? 0.15 : 0.25), 
+            z: ang.z 
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Erreur dans useFrame:", error);
     }
   });
+
+  // Vérifier que les nodes et materials existent
+  if (!nodes || !materials) {
+    console.warn("Modèle GLB non chargé correctement - nodes ou materials manquants");
+    return <group />;
+  }
+
+  // Vérifier qu'au moins le node principal existe
+  if (!nodes.card) {
+    console.warn("Node 'card' manquant dans le modèle GLB");
+    console.log("Nodes disponibles:", Object.keys(nodes));
+    return <group />;
+  }
 
   curve.curveType = "chordal";
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
@@ -303,37 +384,33 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, isVerySmall = fal
           <group
             scale={isVerySmall ? 2.2 : isMobile ? 3 : 4}
             position={[0, -1.2, -0.05]}
-            onPointerOver={() => !isMobile && hover(true)}
-            onPointerOut={() => !isMobile && hover(false)}
-            onPointerUp={(e: any) => {
-              e.target.releasePointerCapture(e.pointerId);
-              drag(false);
-            }}
-            onPointerDown={(e: any) => {
-              e.target.setPointerCapture(e.pointerId);
-              drag(
-                new THREE.Vector3()
-                  .copy(e.point)
-                  .sub(vec.copy(card.current.translation()))
-              );
-            }}
+            onPointerOver={handlePointerOver}
+            onPointerOut={handlePointerOut}
+            onPointerUp={handlePointerUp}
+            onPointerDown={handlePointerDown}
           >
-            <mesh geometry={nodes.card.geometry}>
-              <meshPhysicalMaterial
-                map={materials.base.map}
-                map-anisotropy={16}
-                clearcoat={1}
-                clearcoatRoughness={0.15}
-                roughness={0.9}
-                metalness={0.8}
+            {nodes.card && (
+              <mesh geometry={nodes.card.geometry}>
+                <meshPhysicalMaterial
+                  map={materials['base card']?.map}
+                  map-anisotropy={16}
+                  clearcoat={1}
+                  clearcoatRoughness={0.15}
+                  roughness={0.9}
+                  metalness={0.8}
+                />
+              </mesh>
+            )}
+            {nodes.clip && (
+              <mesh
+                geometry={nodes.clip.geometry}
+                material={materials.metal}
+                material-roughness={0.3}
               />
-            </mesh>
-            <mesh
-              geometry={nodes.clip.geometry}
-              material={materials.metal}
-              material-roughness={0.3}
-            />
-            <mesh geometry={nodes.clamp.geometry} material={materials.metal} />
+            )}
+            {nodes.clamp && (
+              <mesh geometry={nodes.clamp.geometry} material={materials.metal} />
+            )}
           </group>
         </RigidBody>
       </group>

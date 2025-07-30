@@ -1,300 +1,294 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { gsap } from 'gsap'
-import Lanyard from './Home/Card/Lanyard'
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+import SpotlightNavbar from './Home/components/SpotlightNavbar'
+import LightRays from './Home/components/LightRays'
+import About from './About/About'
+
+gsap.registerPlugin(ScrollToPlugin)
 
 export default function Home() {
-  const gridRef = useRef<HTMLDivElement>(null)
-  const [showGrid, setShowGrid] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-  const [isVerySmall, setIsVerySmall] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const navbarRef = useRef<HTMLDivElement>(null)
+  const homeContentRef = useRef<HTMLDivElement>(null)
+  const [isAnimating, setIsAnimating] = useState(false)
+  const [currentSection, setCurrentSection] = useState('home')
+  
+  // Debug log
+  console.log('Current section:', currentSection)
 
+  // Scroll detection
   useEffect(() => {
-    // Fonction pour détecter si on est sur mobile
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-      setIsVerySmall(window.innerWidth < 480 || window.innerHeight < 700) // iPhone et petits écrans
+    const handleScroll = () => {
+      if (isAnimating) return
+      
+      const scrollY = window.scrollY
+      const windowHeight = window.innerHeight
+      
+      if (scrollY < windowHeight * 0.5) {
+        if (currentSection !== 'home') {
+          setCurrentSection('home')
+          
+          // Only animate if not currently animating
+          if (!isAnimating) {
+            // Hide header navbar first
+            gsap.to("#header-nav", {
+              duration: 0.3,
+              opacity: 0,
+              y: -20,
+              ease: "power2.in"
+            })
+            
+            // Restore navbar position
+            gsap.to(navbarRef.current, {
+              duration: 0.7,
+              y: 0,
+              x: 0,
+              scale: 1,
+              ease: "power3.inOut"
+            })
+            
+            // Fade in home content
+            if (homeContentRef.current?.children) {
+              gsap.to(Array.from(homeContentRef.current.children), {
+                duration: 0.5,
+                opacity: 1,
+                y: 0,
+                stagger: 0.05,
+                ease: "power2.out",
+                delay: 0.2
+              })
+            }
+          }
+        }
+      } else {
+        if (currentSection !== 'about') {
+          setCurrentSection('about')
+          
+          // Only animate if not currently animating (to avoid conflicts with manual navigation)
+          if (!isAnimating) {
+            // Animate navbar to header position on scroll
+            gsap.to(navbarRef.current, {
+              duration: 0.4,
+              y: -window.innerHeight * 0.35,
+              x: window.innerWidth * 0.15,
+              scale: 0.85,
+              ease: "power3.inOut"
+            })
+            
+            // Fade out home content
+            if (homeContentRef.current?.children) {
+              gsap.to(Array.from(homeContentRef.current.children), {
+                duration: 0.2,
+                opacity: 0,
+                y: -20,
+                stagger: 0.02,
+                ease: "power2.inOut"
+              })
+            }
+            
+            // Show header navbar
+            gsap.to("#header-nav", {
+              duration: 0.2,
+              opacity: 1,
+              y: 0,
+              ease: "power2.out",
+              delay: 0.15
+            })
+          }
+        }
+      }
     }
 
-    // Vérifier au chargement initial
-    checkMobile()
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [currentSection, isAnimating])
 
-    // Écouter les changements de taille d'écran
-    window.addEventListener('resize', checkMobile)
-
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  useEffect(() => {
-    // Utilisation de GSAP pour initialiser la grille avec des hauteurs adaptatives
-    if (gridRef.current) {
-      const rowHeights = isVerySmall ? '15px 15px 15px 15px 1fr' : 
-                        isMobile ? '20px 20px 20px 20px 1fr' : 
-                        '40px 40px 40px 40px 1fr 30px'
-      gsap.set(gridRef.current, {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(12, 1fr)',
-        gridTemplateRows: rowHeights,
-        minHeight: '100vh',
-        maxHeight: '100vh',
-        gap: '0px',
+  const handleNavClick = (href: string) => {
+    if (isAnimating) return
+    
+    if (href === '#about') {
+      setCurrentSection('about')
+      setIsAnimating(true)
+      
+      const tl = gsap.timeline({
+        onComplete: () => {
+          setIsAnimating(false)
+          // Ensure we're on about section
+          setCurrentSection('about')
+          // Show header navbar
+          gsap.to("#header-nav", {
+            duration: 0.4,
+            opacity: 1,
+            y: 0,
+            ease: "power2.out"
+          })
+        }
       })
-    }
-  }, [isMobile, isVerySmall])
 
-  // Définir les hauteurs de grille selon l'écran
-  const gridRowHeights = isVerySmall ? '15px 15px 15px 15px 1fr' : 
-                         isMobile ? '20px 20px 20px 20px 1fr' : 
-                         '40px 40px 40px 40px 1fr 30px'
+      // Phase 1: Fade out other content and scale down navbar
+      if (homeContentRef.current?.children) {
+        tl.to(Array.from(homeContentRef.current.children), {
+          duration: 0.2,
+          opacity: 0,
+          y: -20,
+          stagger: 0.02,
+          ease: "power2.inOut"
+        })
+      }
+      
+      // Phase 2: Transform navbar to header position
+      tl.to(navbarRef.current, {
+        duration: 0.4,
+        y: -window.innerHeight * 0.35,
+        x: window.innerWidth * 0.15,
+        scale: 0.85,
+        ease: "power3.inOut"
+      }, "-=0.1")
+      
+      // Phase 3: Scroll to about section with smooth easing
+      tl.to(window, {
+        duration: 0.5,
+        scrollTo: {
+          y: "#about",
+          offsetY: 0
+        },
+        ease: "power3.inOut"
+      }, "-=0.2")
+      
+      // Phase 4: Animate about content in
+      tl.fromTo("#about > div", {
+        opacity: 0,
+        y: 40
+      }, {
+        duration: 0.4,
+        opacity: 1,
+        y: 0,
+        ease: "power3.out"
+      }, "-=0.2")
+    } else if (href === '#home') {
+      // Reverse animation to go back home
+      setCurrentSection('home')
+      setIsAnimating(true)
+      
+      const tl = gsap.timeline({
+        onComplete: () => setIsAnimating(false)
+      })
+      
+      // Hide header navbar
+      tl.to("#header-nav", {
+        duration: 0.3,
+        opacity: 0,
+        y: -20,
+        ease: "power2.in"
+      })
+      
+      // Scroll back to home
+      .to(window, {
+        duration: 0.8,
+        scrollTo: "#home",
+        ease: "power3.inOut"
+      }, "-=0.1")
+      
+      // Restore navbar position
+      .to(navbarRef.current, {
+        duration: 0.7,
+        y: 0,
+        x: 0,
+        scale: 1,
+        ease: "power3.inOut"
+      }, "-=0.7")
+      
+      // Fade in home content
+      if (homeContentRef.current?.children) {
+        tl.to(Array.from(homeContentRef.current.children), {
+          duration: 0.5,
+          opacity: 1,
+          y: 0,
+          stagger: 0.05,
+          ease: "power2.out"
+        }, "-=0.3")
+      }
+    }
+  }
 
   return (
-    <div 
-      ref={gridRef}
-      className="h-screen relative overflow-hidden"
-      style={{ 
-        backgroundColor: 'white',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(12, 1fr)',
-        gridTemplateRows: gridRowHeights,
-        gap: '0px',
-        padding: '0px',
-      }}
-    >
-      {/* Toggle Switch - iOS Style */}
-      <div className="fixed bottom-4 right-4 z-50 flex items-center space-x-2">
-        <label className="relative inline-flex items-center cursor-pointer">
-          <input 
-            type="checkbox" 
-            checked={showGrid}
-            onChange={() => setShowGrid(!showGrid)}
-            className="sr-only"
-          />
-          <div className={`relative w-8 h-4 rounded-full transition-colors duration-200 ${
-            showGrid ? 'bg-green-500' : 'bg-gray-300'
-          }`}>
-            <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full shadow-sm transition-transform duration-200 ${
-              showGrid ? 'transform translate-x-4' : 'transform translate-x-0'
-            }`} />
-          </div>
-        </label>
+    <div ref={containerRef} style={{backgroundColor: '#0A0A0A'}}>
+      {/* Light Rays Background Effect */}
+      <div className="fixed inset-0 w-full h-full z-[1]">
+        <LightRays
+          raysOrigin="top-center"
+          raysColor="#E6E6E6"
+          raysSpeed={1.5}
+          lightSpread={0.8}
+          rayLength={1.2}
+          followMouse={true}
+          mouseInfluence={0.1}
+          noiseAmount={0.1}
+          distortion={0.05}
+          className="custom-rays"
+        />
       </div>
 
-      {/* Menu - R1C1: Home */}
-      <div 
-        className="flex items-center justify-start h-full w-full z-5"
-        style={{ 
-          gridColumn: '1 / 2',
-          gridRow: '1 / 2',
-        }}
-      >
-        <a href="#home" className={`text-black font-sans ${isVerySmall ? 'text-sm' : 'text-base'} md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0`}>Home</a>
+      {/* Fixed Header Navbar (initially hidden) */}
+      <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-40" style={{opacity: 0}} id="header-nav">
+        <SpotlightNavbar
+          key={`header-${currentSection}`}
+          items={[
+            { label: 'Home', href: '#home', active: currentSection === 'home' },
+            { label: 'About', href: '#about', active: currentSection === 'about' },
+            { label: 'Work', href: '#work' },
+            { label: 'Contact', href: '#contact' },
+          ]}
+          className="inline-flex"
+          onNavClick={handleNavClick}
+        />
       </div>
-
-      {/* Menu - R2C1: About */}
-      <div 
-        className="flex items-center justify-start h-full w-full z-5"
-        style={{ 
-          gridColumn: '1 / 2',
-          gridRow: '2 / 3',
-        }}
-      >
-        <a href="#about" className={`text-black font-sans ${isVerySmall ? 'text-sm' : 'text-base'} md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0`}>About</a>
-      </div>
-
-      {/* Menu - R3C1: Work */}
-      <div 
-        className="flex items-center justify-start h-full w-full z-5"
-        style={{ 
-          gridColumn: '1 / 2',
-          gridRow: '3 / 4',
-        }}
-      >
-        <a href="#work" className={`text-black font-sans ${isVerySmall ? 'text-sm' : 'text-base'} md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0`}>Work</a>
-      </div>
-
-      {/* Menu - R4C1: Contact */}
-      <div 
-        className="flex items-center justify-start h-full w-full z-5"
-        style={{ 
-          gridColumn: '1 / 2',
-          gridRow: '4 / 5',
-        }}
-      >
-        <a href="#contact" className={`text-black font-sans ${isVerySmall ? 'text-sm' : 'text-base'} md:text-3xl hover:bg-[rgb(0,255,0)] transition-colors px-1 py-0`}>Contact</a>
-      </div>
-
-      {/* Language Selector - R1C12: FR/EN */}
-      <div 
-        className="flex items-center justify-center h-full w-full z-5"
-        style={{ 
-          gridColumn: '12 / 13',
-          gridRow: '1 / 2',
-        }}
-      >
-        <div className={`text-black font-sans ${isVerySmall ? 'text-xs' : 'text-xs'} md:text-lg h-full w-full flex items-center justify-center`}>
-          <span className="cursor-pointer hover:text-gray-600 transition-colors">FR</span>
-          <span className="mx-1">/</span>
-          <span className="cursor-pointer hover:text-gray-600 transition-colors">EN</span>
-        </div>
-      </div>
-
-      {/* Footer Desktop - R6: Thomas Mionnet © 2025 + Drag it! défilant */}
-      {!isMobile && (
-        <div 
-          className="relative h-full w-full z-5 overflow-hidden"
-          style={{ 
-            gridColumn: '1 / -1',
-            gridRow: '6',
-            backgroundColor: 'rgb(0,255,0)',
-          }}
-        >
-          {/* Copyright - desktop */}
-          <div className="absolute left-0 top-0 h-full flex items-center justify-center px-4" style={{ width: '50%' }}>
-            <p className="text-black font-sans text-lg font-bold whitespace-nowrap">
-              Thomas Mionnet © 2025
-            </p>
-          </div>
-          
-          {/* Texte défilant "drag it !" - desktop */}
-          <div className="absolute top-0 h-full flex items-center overflow-hidden" style={{ left: '50%', width: '50%' }}>
-            <div 
-              className="whitespace-nowrap text-black font-sans text-2xl font-bold animate-scroll"
-              style={{
-                animation: 'scroll-left 8s linear infinite',
-              }}
-            >
-              drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • 
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Footer Mobile - Position fixe au niveau du toggle */}
-      {isMobile && (
-        <div className="fixed bottom-4 left-4 right-16 z-5 h-8 flex items-center overflow-hidden" style={{ backgroundColor: 'rgb(0,255,0)' }}>
-          {/* Copyright - mobile fixe */}
-          <div className="absolute left-0 top-0 h-full flex items-center justify-center px-2" style={{ width: '50%' }}>
-            <p className={`text-black font-sans ${isVerySmall ? 'text-xs' : 'text-xs'} font-bold whitespace-nowrap`}>
-              Thomas Mionnet © 2025
-            </p>
-          </div>
-          
-          {/* Texte défilant "drag it !" - mobile fixe */}
-          <div className="absolute top-0 h-full flex items-center overflow-hidden" style={{ left: '50%', width: '50%' }}>
-            <div 
-              className={`whitespace-nowrap text-black font-sans ${isVerySmall ? 'text-xs' : 'text-xs'} font-bold animate-scroll`}
-              style={{
-                animation: 'scroll-left 8s linear infinite',
-              }}
-            >
-              drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • drag it ! • 
-            </div>
-          </div>
-        </div>
-      )}
       
-      {/* Animation CSS pour le défilement */}
-      <style jsx>{`
-        @keyframes scroll-left {
-          0% {
-            transform: translateX(0%);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
-        }
-        .animate-scroll {
-          animation: scroll-left 12s linear infinite;
-        }
-      `}</style>
+      {/* Home Section */}
+      <section id="home" className="relative min-h-screen z-[2]">
+        {/* Home Content */}
+        <div ref={homeContentRef} className="absolute h-screen flex items-center z-30" style={{left: '20%', width: '60%'}}>
+          <div className="text-left max-w-2xl">
+            {/* Portfolio Label */}
+            <div style={{marginBottom: '2vh'}}>
+              <p className="text-xs tracking-widest uppercase font-medium" style={{color: '#E6E6E6', fontFamily: 'OffBitTrial-Dot'}}>
+                PORTFOLIO 2025
+              </p>
+            </div>
 
-      {/* Content - R1 à R6: Lanyard Full Screen */}
-      <div 
-        className="flex items-center justify-center h-full w-full z-30"
-        style={{ 
-          gridColumn: '1 / -1',
-          gridRow: '1 / -1',
-        }}
-      >
-        <Lanyard isVerySmall={isVerySmall} />
-      </div>
+            {/* Main Title */}
+            <h1 className="text-5xl lg:text-7xl font-bold leading-tight tracking-wide" style={{color: '#E6E6E6', marginBottom: '3vh'}}>
+              Hello! My name <br/> is Thomas
+            </h1>
 
-      {/* Debug Grid - Conditional */}
-      {showGrid && (
-        <div 
-          className="absolute top-0 left-0 w-full h-full pointer-events-none z-30"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(12, 1fr)',
-            gridTemplateRows: gridRowHeights,
-            gap: '0px',
-            padding: '0px',
-          }}
-        >
-          {/* Génération de toutes les cellules de la grille */}
-          {Array.from({ length: isMobile ? 5 : 6 }, (_, rowIndex) => 
-            Array.from({ length: 12 }, (_, colIndex) => {
-              const rowNames = isMobile ? ['menu1', 'menu2', 'menu3', 'menu4', 'content'] : ['menu1', 'menu2', 'menu3', 'menu4', 'content', 'footer']
-              const rowColors = ['bg-purple-500', 'bg-indigo-500', 'bg-blue-500', 'bg-green-500', 'bg-red-500', 'bg-yellow-500']
-              
-              return (
-                <div
-                  key={`cell-${rowIndex}-${colIndex}`}
-                  className={`border-2 border-white border-opacity-60 ${rowColors[rowIndex]} bg-opacity-20 flex items-center justify-center`}
-                  style={{ 
-                    gridColumn: `${colIndex + 1} / ${colIndex + 2}`,
-                    gridRow: `${rowIndex + 1} / ${rowIndex + 2}`,
-                    minHeight: rowIndex === 5 ? '30px' : rowIndex < 4 ? (isVerySmall ? '15px' : isMobile ? '20px' : '40px') : 'auto'
-                  }}
-                >
-                  <div className="text-xs text-white font-bold text-center bg-black bg-opacity-50 px-1 py-0.5 rounded font-sans">
-                    <div>R{rowIndex + 1}C{colIndex + 1}</div>
-                    <div className="text-[10px] opacity-70">{rowNames[rowIndex]}</div>
-                  </div>
-                </div>
-              )
-            })
-          )}
-          
-          {/* Lignes de séparation principales */}
-          <div 
-            className="border-t-4 border-white border-opacity-80"
-            style={{ gridColumn: '1 / -1', gridRow: '1 / 2' }}
-          />
-          <div 
-            className="border-t-4 border-white border-opacity-80"
-            style={{ gridColumn: '1 / -1', gridRow: '2 / 3' }}
-          />
-          <div 
-            className="border-t-4 border-white border-opacity-80"
-            style={{ gridColumn: '1 / -1', gridRow: '3 / 4' }}
-          />
-          <div 
-            className="border-t-4 border-white border-opacity-80"
-            style={{ gridColumn: '1 / -1', gridRow: '4 / 5' }}
-          />
-          <div 
-            className="border-t-4 border-white border-opacity-80"
-            style={{ gridColumn: '1 / -1', gridRow: '5 / 6' }}
-          />
-          {!isMobile && (
-            <div 
-              className="border-t-4 border-white border-opacity-80"
-              style={{ gridColumn: '1 / -1', gridRow: '6 / 7' }}
-            />
-          )}
-          
-          {/* Lignes de séparation des colonnes */}
-          {Array.from({ length: 13 }, (_, i) => (
-            <div
-              key={`col-${i}`}
-              className="border-l-4 border-white border-opacity-80"
-              style={{ gridColumn: `${i + 1} / ${i + 2}`, gridRow: '1 / -1' }}
-            />
-          ))}
+            {/* Subtitle */}
+            <p className="text-lg lg:text-2xl leading-relaxed font-normal" style={{color: '#A0A0A0', marginBottom: '6vh'}}>
+              I'm a cybersecurity engineering student <br/> based in Angers, France.
+            </p>
+
+            {/* Navigation Menu */}
+            <div ref={navbarRef}>
+              <SpotlightNavbar
+                key={`main-${currentSection}`}
+                items={[
+                  { label: 'Home', href: '#home', active: currentSection === 'home' },
+                  { label: 'About', href: '#about', active: currentSection === 'about' },
+                  { label: 'Work', href: '#work' },
+                  { label: 'Contact', href: '#contact' },
+                ]}
+                className="inline-flex"
+                onNavClick={handleNavClick}
+              />
+            </div>
+          </div>
         </div>
-      )}
+      </section>
+
+      {/* About Section */}
+      <About />
     </div>
   )
 }

@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Polices personnalisées */
+@font-face {
+  font-family: 'OffBitTrial-Dot';
+  src: url('/fonts/OffBitTrial-Dot.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'OffBitTrial-Regular';
+  src: url('/fonts/OffBitTrial-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'OffBitTrial-Bold';
+  src: url('/fonts/OffBitTrial-Bold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Base styles pour une meilleure expérience mobile */
 @layer base {
   html {
@@ -57,6 +82,215 @@
     backface-visibility: hidden;
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
+    will-change: transform;
+  }
+}
+
+/* Spotlight navbar styles - Exact translation from original */
+@layer components {
+  /* Spotlight effects */
+  nav::before,
+  nav::after,
+  nav ul.lit {
+    filter: url('#spotlight');
+  }
+
+  /* Ensure content is above filters */
+  nav ul.content {
+    filter: none;
+  }
+
+  ul.content::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 100px;
+    pointer-events: none;
+    border: 1px solid white;
+    filter: url('#ambience') brightness(2);
+  }
+
+  ul.lit {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+
+  /* Navigation styles */
+  nav {
+    height: 60px;
+    border-radius: 100px;
+    border: 1px solid color-mix(in hsl, canvasText, #0000 75%);
+    position: relative;
+    z-index: 50;
+  }
+
+  nav::before,
+  nav::after {
+    pointer-events: none;
+  }
+
+  nav::after {
+    background: color-mix(in hsl, canvas, canvasText 10%);
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid color-mix(in hsl, canvasText, #0000);
+    z-index: -1;
+    border-radius: 100px;
+    opacity: 0.15;
+  }
+
+  nav::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid color-mix(in hsl, canvasText, #0000);
+    z-index: -1;
+    border-radius: 100px;
+    pointer-events: none;
+  }
+
+  nav ul {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+    height: 100%;
+    font-size: 1rem;
+  }
+
+  nav ul.content {
+    position: relative;
+    z-index: 50;
+  }
+
+  nav ul.lit {
+    pointer-events: none;
+  }
+
+  nav ul.content {
+    pointer-events: auto;
+  }
+
+  nav ul.content li {
+    pointer-events: auto;
+  }
+
+  nav ul.content li a {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  nav ul.lit li {
+    padding: 0.75rem 1.5rem;
+  }
+
+  nav ul li {
+    height: 100%;
+    display: grid;
+    place-items: center;
+  }
+
+  nav ul li a {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    padding: 0.75rem 1.5rem;
+    text-decoration: none;
+    color: #E6E6E6;
+    opacity: 0.4;
+    transition: opacity 0.25s ease-out;
+  }
+
+  nav ul li a:is(:hover, :focus-visible) {
+    opacity: 1;
+  }
+
+  nav ul li a[data-active="true"] {
+    opacity: 0.8;
+  }
+
+  nav ul li a span {
+    pointer-events: none;
+  }
+
+  /* Diamond and bear link styles */
+  .diamond {
+    color: canvasText;
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    width: 48px;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    opacity: 0.8;
+  }
+
+  .diamond svg {
+    width: 65%;
+  }
+
+  .bear-link {
+    color: canvasText;
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    width: 48px;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    opacity: 0.8;
+  }
+
+  .bear-link svg {
+    width: 75%;
+  }
+
+  .diamond:is(:hover, :focus-visible),
+  .bear-link:is(:hover, :focus-visible) {
+    opacity: 1;
+  }
+
+  /* Screen reader only class */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: auto; /* Let GSAP handle scrolling */
+  }
+
+  /* Section transitions */
+  section {
+    scroll-snap-align: start;
+  }
+
+  /* About section styling */
+  #about {
+    background: #0A0A0A;
+  }
+
+  /* Animation states */
+  .nav-animating {
+    pointer-events: none;
+  }
+
+  /* Navbar animation helper */
+  nav {
     will-change: transform;
   }
 } 
