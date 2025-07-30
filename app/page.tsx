@@ -266,7 +266,7 @@ export default function Home() {
 
             {/* Subtitle */}
             <p className="text-lg lg:text-2xl leading-relaxed font-normal" style={{color: '#A0A0A0', marginBottom: '6vh'}}>
-              I'm a cybersecurity engineering student <br/> based in Angers, France.
+              I&apos;m a cybersecurity engineering student <br/> based in Angers, France.
             </p>
 
             {/* Navigation Menu */}
